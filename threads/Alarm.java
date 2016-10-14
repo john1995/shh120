@@ -29,15 +29,12 @@ public class Alarm {
 	 * should be run.
 	 */
 	public void timerInterrupt() {
-		//KThread.currentThread().yield();
-	    KThread temp;
-        if(KThread.waitQ.queue.size() == 0){
-            return;
-        }	
-        while(KThread.waitQ.top().waitTime < Machine.timer().getTime()){
-            temp = KThread.waitQ.pop();
-            temp.ready();
-        }
+		KThread.currentThread().yield();
+	    	KThread temp;
+        	while(KThread.waitQ.queue.size() != 0 && KThread.waitQ.top().waitTime < Machine.timer().getTime()){
+            		temp = KThread.waitQ.pop();
+            		temp.ready();
+       		}
         
 	}
  
@@ -54,14 +51,17 @@ public class Alarm {
 	 * @see nachos.machine.Timer#getTime()
 	 */ 
 	public void waitUntil(long x) {
-		// for now, cheat just to get something working (busy waiting is bad)
-        if(x <= 0){
-            return;
-        }
+		//disable interrupts
+		Machine.interrupt().disable();
+        	if(x <= 0){
+            		return;
+        	}
 		long wakeTime = Machine.timer().getTime() + x;
-        KThread.currentThread().waitTime = wakeTime;
-        KThread.waitQ.push(KThread.currentThread());
-        KThread.currentThread().sleep();
+        	KThread.currentThread().waitTime = wakeTime;
+        	KThread.waitQ.push(KThread.currentThread());
+        	KThread.currentThread().sleep();
+		//enable interrupts
+		Machine.interrupt().enable();
 	}
 
     public static void alarmTest1() {
@@ -81,37 +81,4 @@ public class Alarm {
     }
 }
 
-/*public class waitQueue {
-    
-    public List queue;
 
-    public waitQueue(){
-        queue = new ArrayList();
-    }
-
-    public void push(KThread thread){
-        
-        boolean flag = false;  
-        
-        for(int i = 0; i < queue.size(); i++){
-            if(thread.waitTime < queue.get(i).waitTime){
-                queue.add(i, thread);
-                flag = true; 
-            }
-        }
-        if(!flag){
-            queue.add(queue.size() - 1, thread);
-        }
-
-    }
-    public KThread top(){
-        return queue.get(0);
-    }
-    public KThread pop(){
-        
-        KThread temp = queue.get(0);
-        queue.remove(0);
-        return temp;
-    }
-    
-}*/
