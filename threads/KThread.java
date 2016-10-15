@@ -42,8 +42,9 @@ import nachos.machine.*;
 
 public class KThread {
 	
-    public long waitTime;
-    /**
+	public long waitTime;
+	public boolean hasBeenJoined;
+	/**
 	 * Get the current thread.
 	 * 
 	 * @return the current thread.
@@ -58,7 +59,8 @@ public class KThread {
 	 * create an idle thread as well.
 	 */
 	public KThread() {
-        waitTime = 0;
+        	waitTime = 0;
+		hasBeenJoined = false;
 		if (currentThread != null) {
 			tcb = new TCB();
 		}
@@ -287,8 +289,14 @@ public class KThread {
 	 */
 	public void join() {
 		Lib.debug(dbgThread, "Joining to thread: " + toString());
-
 		Lib.assertTrue(this != currentThread);
+		Lib.assertTrue(hasBeenJoined == false);
+		System.out.println("thread status(4=finished): "+status);
+		while(status != statusFinished) {
+			System.out.println("thread has not finished executing");	
+		}
+		System.out.println("Done!");
+		return;
 
 	}
 
@@ -412,6 +420,35 @@ public class KThread {
 		private int which;
 	}
 
+	// Place Join test code in the KThread class and invoke test methods
+    	// from KThread.selfTest().
+    
+    	// Simple test for the situation where the child finishes before
+    	// the parent calls join on it.
+    
+    	private static void joinTest1 () {
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+		    		System.out.println("I (heart) Nachos!");
+			}
+	    	});
+		child1.setName("child1").fork();
+
+		// We want the child to finish before we call join.  Although
+		// our solutions to the problems cannot busy wait, our test
+		// programs can!
+
+		for (int i = 0; i < 5; i++) {
+	    		System.out.println ("busy...");
+	    		KThread.currentThread().yield();
+		}
+
+		child1.join();
+		System.out.println("After joining, child1 should be finished.");
+		System.out.println("is it? " + (child1.status == statusFinished));
+		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+    	}	
+
 	/**
 	 * Tests whether this module is working.
 	 */
@@ -420,6 +457,7 @@ public class KThread {
 
 		new KThread(new PingTest(1)).setName("forked thread").fork();
 		new PingTest(0).run();
+		joinTest1();
 	}
 
 	private static final char dbgThread = 't';
@@ -465,7 +503,7 @@ public class KThread {
 
 	private static ThreadQueue readyQueue = null;
  
-    public static waitQueue waitQ = new waitQueue();
+    	public static waitQueue waitQ = new waitQueue();
 
 	private static KThread currentThread = null;
 
