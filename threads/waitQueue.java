@@ -12,11 +12,13 @@ public class waitQueue {
     }
 
     public void push(KThread thread){
-        
+ 
         boolean flag = false;  
-        
-        for(int i = 0; i < queue.size(); i++){
-            if(thread.waitTime < (queue.get(i)).waitTime){
+
+	int sieze = queue.size();       
+ 
+        for(int i = 0; i < sieze; i++){
+            if(thread.waitTime < ((KThread)queue.get(i)).waitTime){
                 queue.add(i, thread);
                 flag = true; 
             }
@@ -31,11 +33,11 @@ public class waitQueue {
 
     }
     public KThread top(){
-        return queue.get(0);
+        return (KThread)queue.get(0);
     }
     public KThread pop(){
     
-        KThread temp = queue.get(0);
+        KThread temp = (KThread)queue.get(0);
         queue.remove(0);
         return temp;
     }

@@ -57,7 +57,9 @@ public class Alarm {
             		return;
         	}
 		long wakeTime = Machine.timer().getTime() + x;
+
         	KThread.currentThread().waitTime = wakeTime;
+		System.out.println(KThread.currentThread().waitTime - x);
         	KThread.waitQ.push(KThread.currentThread());
         	KThread.sleep();
 		//enable interrupts
