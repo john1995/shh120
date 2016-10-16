@@ -44,6 +44,7 @@ public class KThread {
 	
 	public long waitTime;
 	public boolean hasBeenJoined;
+	public KThread parent;
 	/**
 	 * Get the current thread.
 	 * 
@@ -61,6 +62,7 @@ public class KThread {
 	public KThread() {
         	waitTime = 0;
 		hasBeenJoined = false;
+		parent = null;
 		if (currentThread != null) {
 			tcb = new TCB();
 		}
@@ -210,7 +212,11 @@ public class KThread {
 
 		currentThread.status = statusFinished;
 
+		if(currentThread.parent != null)
+			currentThread.parent.ready();
+
 		sleep();
+
 	}
 
 	/**
@@ -292,11 +298,26 @@ public class KThread {
 		Lib.assertTrue(this != currentThread);
 		Lib.assertTrue(hasBeenJoined == false);
 		System.out.println("thread status(4=finished): "+status);
-		while(status != statusFinished) {
-			System.out.println("thread has not finished executing");	
-		}
-		System.out.println("Done!");
-		return;
+		if(status == statusFinished)
+			return;
+
+		Machine.interrupt().disable();
+
+		parent = currentThread();
+
+		sleep();
+
+		//somehow make sure that in finish, it readies the parent thread
+
+		Machine.interrupt().enable();
+		//while(status != statusFinished) {
+	//		System.out.println("thread has not finished executing");	
+	//	}
+	//	System.out.println("Done!");
+	
+		//put this into ready queue
+		//put current thread to sleep
+			
 
 	}
 
@@ -438,10 +459,6 @@ public class KThread {
 		// our solutions to the problems cannot busy wait, our test
 		// programs can!
 
-		for (int i = 0; i < 5; i++) {
-	    		System.out.println ("busy...");
-	    		KThread.currentThread().yield();
-		}
 
 		child1.join();
 		System.out.println("After joining, child1 should be finished.");
