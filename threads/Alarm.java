@@ -59,7 +59,6 @@ public class Alarm {
 		long wakeTime = Machine.timer().getTime() + x;
 
         	KThread.currentThread().waitTime = wakeTime;
-		System.out.println(KThread.currentThread().waitTime - x);
         	KThread.waitQ.push(KThread.currentThread());
         	KThread.sleep();
 		//enable interrupts
@@ -77,9 +76,58 @@ public class Alarm {
             System.out.println ("alarmTest1: waited for " + (t1 - t0) + " ticks");
         }
     }
+
+	//tests if wait until is called on multiple threads, it will still syncronize
+	private static void alarmTest2(){
+		System.out.println("Starting alarm test 2");
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 1 is executing");
+            			long t0 = Machine.timer().getTime();
+				ThreadedKernel.alarm.waitUntil(1000 * 1000);
+				long t1 = Machine.timer().getTime();
+				System.out.println("child1 waited for " + (t1 - t0) + "ticks");
+			}
+		});
+		child1.setName("child1").fork();
+
+
+		KThread child2 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 2 is executing");
+				long t0 = Machine.timer().getTime();
+				ThreadedKernel.alarm.waitUntil(10 * 1000);
+				long t1 = Machine.timer().getTime();
+				System.out.println("child2 waited for " + (t1 - t0) + "ticks");
+			}
+		});
+		child2.setName("child2").fork();
+
+		KThread child3 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 3 is executing");
+				long t0 = Machine.timer().getTime();
+				ThreadedKernel.alarm.waitUntil(100 * 1000);
+				long t1 = Machine.timer().getTime();
+				System.out.println("child3 waited for " + (t1 - t0) + "ticks");
+			}
+		});
+		child3.setName("child3").fork();
+
+		child1.join();
+		child2.join();
+		child3.join();
+
+
+	}	
+
     public static void selfTest() {
         
         alarmTest1();
+	alarmTest2();
     }
 }
 

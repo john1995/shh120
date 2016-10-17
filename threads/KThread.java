@@ -277,7 +277,7 @@ public class KThread {
 	 */
 	public void ready() {
 		Lib.debug(dbgThread, "Ready thread: " + toString());
-
+		
 		Lib.assertTrue(Machine.interrupt().disabled());
 		Lib.assertTrue(status != statusReady);
 
@@ -524,23 +524,34 @@ public class KThread {
 
 		KThread child2 = new KThread( new Runnable () {
 			public void run() {
-				for(int i = 0; i < 1000; i++)
+				for(int i = 0; i < 10; i++)
 					System.out.println("child 2 is executing");
-				ThreadedKernel.alarm.waitUntil(2 * 1000);
+				ThreadedKernel.alarm.waitUntil(10000 * 1000);
 				for(int i = 0; i < 10; i++)
 					System.out.println("child 2 is still executing");	
 			}
 		});
 		child2.setName("child2").fork();
 
+		KThread child3 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 3 is executing");
+				ThreadedKernel.alarm.waitUntil(100 * 1000);
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 3 is still executing");	
+			}
+		});
+		child3.setName("child3").fork();
+
+		child3.join();
 		child1.join();
 		child2.join();		
 
-		System.out.println("After joining, child1 should be finished.");
-		System.out.println("is it? " + (child1.status == statusFinished));
 		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+		Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
+		Lib.assertTrue((child3.status == statusFinished), " Expected child3 to be finished.");
 
-		Lib.assertTrue((child2.status == statusFinished), " Expected child1 to be finished.");
 	}
 
 
@@ -556,7 +567,7 @@ public class KThread {
 		//joinTest2();
 		//joinTest3();
 		//joinTest4();
-		joinTest5();
+		//joinTest5();
 	}
 
 	private static final char dbgThread = 't';

@@ -12,7 +12,6 @@ public class waitQueue {
     }
 
     public void push(KThread thread){
- 
         boolean flag = false;  
 
 	int sieze = queue.size();       
@@ -20,7 +19,8 @@ public class waitQueue {
         for(int i = 0; i < sieze; i++){
             if(thread.waitTime < ((KThread)queue.get(i)).waitTime){
                 queue.add(i, thread);
-                flag = true; 
+                flag = true;
+		break; 
             }
         }
         if(!flag){
@@ -30,7 +30,6 @@ public class waitQueue {
                 queue.add(queue.size() - 1, thread);
             }
         }
-
     }
     public KThread top(){
         return (KThread)queue.get(0);
