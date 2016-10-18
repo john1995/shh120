@@ -118,8 +118,8 @@ public class Alarm {
 		child3.setName("child3").fork();
 
 		child1.join();
-		child2.join();
-		child3.join();
+
+		System.out.println("Done");
 
 
 	}	

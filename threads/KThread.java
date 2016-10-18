@@ -554,6 +554,64 @@ public class KThread {
 
 	}
 
+	//tests if join is called on multiple threads, it will still syncronize
+	private static void joinTest6(){
+		KThread child1 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 1 is executing");
+				ThreadedKernel.alarm.waitUntil(10000 * 1000);
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 1 is still executing");	
+			}
+		});
+		child1.setName("child1").fork();
+
+
+		KThread child2 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 2 is executing");
+				ThreadedKernel.alarm.waitUntil(1000 * 1000);
+				child1.join();
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 2 is still executing");	
+			}
+		});
+		child2.setName("child2").fork();
+
+		KThread child3 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 3 is executing");
+				ThreadedKernel.alarm.waitUntil(100 * 1000);
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 3 is still executing");	
+			}
+		});
+		child3.setName("child3").fork();
+
+		KThread child4 = new KThread( new Runnable () {
+			public void run() {
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 4 is executing");
+				ThreadedKernel.alarm.waitUntil(10 * 1000);
+				child3.join();
+				for(int i = 0; i < 10; i++)
+					System.out.println("child 4 is still executing");	
+			}
+		});
+		child4.setName("child4").fork();
+
+		child2.join();
+		child4.join();	
+
+		Lib.assertTrue((child1.status == statusFinished), " Expected child1 to be finished.");
+		Lib.assertTrue((child2.status == statusFinished), " Expected child2 to be finished.");
+		Lib.assertTrue((child3.status == statusFinished), " Expected child3 to be finished.");
+		Lib.assertTrue((child4.status == statusFinished), " Expected child4 to be finished.");
+	}
+
 
 	/**
 	 * Tests whether this module is working.
@@ -563,11 +621,12 @@ public class KThread {
 
 		new KThread(new PingTest(1)).setName("forked thread").fork();
 		new PingTest(0).run();
-		//joinTest1();
-		//joinTest2();
+		joinTest1();
+		joinTest2();
 		//joinTest3();
 		//joinTest4();
-		//joinTest5();
+		joinTest5();
+		joinTest6();
 	}
 
 	private static final char dbgThread = 't';
