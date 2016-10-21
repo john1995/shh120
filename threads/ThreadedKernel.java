@@ -1,6 +1,7 @@
 package nachos.threads;
 
 import nachos.machine.*;
+import java.util.*;
 
 /**
  * A multi-threaded OS kernel.
@@ -49,7 +50,7 @@ public class ThreadedKernel extends Kernel {
 		//KThread.selfTest();
 		//Semaphore.selfTest();
 		//SynchList.selfTest();
-        	//Alarm.selfTest();
+        //Alarm.selfTest();
 		//Condition2.selfTest();
         Communicator.selfTest();
 		if (Machine.bank() != null) {
